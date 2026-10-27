@@ -18,7 +18,8 @@
   "data": [
     "https://maps.ce-net.com/tiles/layers/trana-feed.json",
     "https://www.trana.app/data/world.json",
-    "https://leif-rydenfalk.github.io/trana-twinton-link/bridge.json"
+    "https://leif-rydenfalk.github.io/trana-twinton-link/bridge.json",
+    "https://leif-rydenfalk.github.io/trana-twinton-link/feed.json"
   ],
   "models": [],
   "entry": "entry.js"
