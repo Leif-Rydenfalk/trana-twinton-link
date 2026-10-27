@@ -2,7 +2,7 @@
 
 The live link between **Trana** (trana.app) and **Twinton** (maps.ce-net.com).
 
-- Twin: <https://maps.ce-net.com/?app=trana-relay>
+- Twin: <https://maps.ce-net.com/?app=https%3A%2F%2Fleif-rydenfalk.github.io%2Ftrana-twinton-link%2Ftwin%2Fapp.json>
 - Trana: <https://trana.app/>
 - Bridge: <https://leif-rydenfalk.github.io/trana-twinton-link/bridge.json>
 - Status page: <https://leif-rydenfalk.github.io/trana-twinton-link/>
@@ -18,7 +18,7 @@ twin; the twin names the post. Neither side copies the other.
 
 `heartbeat.py` runs in GitHub Actions every ten minutes (best effort). It fetches:
 
-1. the published twin manifest at `tiles.ce-net.com/community/trana-relay/app.json`;
+1. the published twin manifest at `leif-rydenfalk.github.io/trana-twinton-link/twin/app.json`;
 2. Trana's public layer at `maps.ce-net.com/tiles/layers/trana-feed.json`;
 3. the previous `bridge.json`, so a transient failure does not erase the thread id.
 
