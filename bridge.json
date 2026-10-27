@@ -1,0 +1,61 @@
+{
+  "schema": "twinton.trana/1",
+  "twin": "trana-relay",
+  "title": "Trana-Twinton relay",
+  "twin_url": "https://maps.ce-net.com/?app=trana-relay",
+  "thread": null,
+  "thread_url": null,
+  "link": {
+    "state": "broken",
+    "checked_at": 1793061245,
+    "twin_ok": false,
+    "post_ok": false,
+    "layer_ok": true,
+    "layer_age_s": 8420,
+    "post_title": null,
+    "errors": [
+      "twin manifest: HTTP Error 404: Not Found",
+      "announcement is not in the public layer"
+    ]
+  },
+  "heartbeat": {
+    "updated": 1793061245,
+    "runs": 1,
+    "last_state": "broken",
+    "changed_at": 1793061245,
+    "since": 1793061245,
+    "schedule": "every 10 min (GitHub Actions best effort)"
+  },
+  "sources": [
+    {
+      "id": "trana-layer",
+      "url": "https://maps.ce-net.com/tiles/layers/trana-feed.json",
+      "kind": "observed",
+      "cadence_s": 300,
+      "credit": "Trana public layer (trana.feed/2), read by the twin and by this heartbeat"
+    },
+    {
+      "id": "trana-world",
+      "url": "https://www.trana.app/data/world.json",
+      "kind": "observed",
+      "cadence_s": 3600,
+      "credit": "Trana world of named places (trana.world/2)"
+    },
+    {
+      "id": "twin-manifest",
+      "url": "https://tiles.ce-net.com/community/trana-relay/app.json",
+      "kind": "observed",
+      "cadence_s": 60,
+      "credit": "Published Twinton twin trana-relay"
+    }
+  ],
+  "streams": [
+    {
+      "id": "trana-post",
+      "kind": "social",
+      "url": "https://trana.app/",
+      "state": "missing"
+    }
+  ],
+  "updated": 1793061245
+}
