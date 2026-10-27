@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Trana–Twinton relay: the link</title>
+<style>
+:root { --bg:#0b0f14; --card:#121922; --line:#23303d; --ink:#e7edf3; --dim:#93a4b5; --ok:#43e08a; --warn:#ffb547; --bad:#ff6b6b; --acc:#4fe3ff; --mono:ui-monospace,SFMono-Regular,Menlo,monospace; --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; }
+* { box-sizing:border-box; }
+body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.55 var(--sans); }
+.wrap { max-width:820px; margin:0 auto; padding:44px 22px 80px; }
+.kicker { font:600 11px/1 var(--mono); letter-spacing:.16em; text-transform:uppercase; color:var(--acc); }
+h1 { font-size:clamp(30px,5vw,48px); line-height:1.05; letter-spacing:-.03em; margin:14px 0 14px; }
+.lede { color:var(--dim); font-size:18px; max-width:680px; margin:0 0 28px; }
+a { color:var(--acc); text-decoration:none; } a:hover { text-decoration:underline; }
+.card { border:1px solid var(--line); background:var(--card); border-radius:16px; padding:20px 22px; margin:18px 0; }
+.state { display:flex; align-items:center; gap:10px; font:600 13px/1 var(--mono); letter-spacing:.06em; text-transform:uppercase; }
+.dot { width:9px; height:9px; border-radius:50%; background:var(--dim); box-shadow:0 0 0 4px color-mix(in srgb,var(--dim) 18%,transparent); }
+.dot.live { background:var(--ok); box-shadow:0 0 0 4px color-mix(in srgb,var(--ok) 18%,transparent); }
+.dot.stale { background:var(--warn); box-shadow:0 0 0 4px color-mix(in srgb,var(--warn) 18%,transparent); }
+.dot.broken { background:var(--bad); box-shadow:0 0 0 4px color-mix(in srgb,var(--bad) 18%,transparent); }
+.grid { display:grid; grid-template-columns:1fr 1fr; gap:10px 22px; margin-top:16px; font-size:14.5px; }
+.grid div { border-top:1px solid var(--line); padding-top:8px; }
+.grid b { display:block; font:500 11px/1.4 var(--mono); letter-spacing:.07em; text-transform:uppercase; color:var(--dim); margin-bottom:3px; }
+.mono { font-family:var(--mono); font-size:13px; word-break:break-all; }
+.row { display:flex; flex-wrap:wrap; gap:10px; margin-top:18px; }
+.btn { border:1px solid var(--line); border-radius:999px; padding:7px 13px; color:var(--ink); font-size:13px; }
+.btn.primary { background:var(--acc); color:#08222a; border-color:var(--acc); font-weight:600; }
+.note { color:var(--dim); font-size:13.5px; margin-top:22px; }
+h2 { font-size:19px; letter-spacing:-.01em; margin:34px 0 8px; }
+p { margin:0 0 13px; }
+code { font:13px/1.5 var(--mono); background:color-mix(in srgb,var(--ink) 7%,transparent); padding:1px 5px; border-radius:5px; }
+footer { border-top:1px solid var(--line); margin-top:44px; padding-top:16px; color:var(--dim); font-size:12.5px; }
+@media(max-width:620px) { .grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">Twinton / maps.ce-net.com · Trana / trana.app</div>
+  <h1>The link is the twin.</h1>
+  <p class="lede">A small relay cabinet on the globe, and a heartbeat that checks both ends. The twin reads Trana's public layer; this page and the GitHub Action record whether the two still see each other.</p>
+
+  <div class="card">
+    <div class="state"><span class="dot" id="dot"></span><span id="state">reading bridge.json…</span></div>
+    <div class="grid">
+      <div><b>Twin</b><a href="https://maps.ce-net.com/?app=trana-relay">maps.ce-net.com/?app=trana-relay</a></div>
+      <div><b>Trana</b><a href="https://trana.app/">trana.app</a></div>
+      <div><b>Announcement</b><span id="post">—</span></div>
+      <div><b>Heartbeat</b><span id="beat">—</span></div>
+      <div><b>Layer age</b><span id="layer">—</span></div>
+      <div><b>Bridge JSON</b><a href="bridge.json" class="mono">bridge.json</a></div>
+    </div>
+    <div class="row">
+      <a class="btn primary" href="https://maps.ce-net.com/?app=trana-relay">Open the twin</a>
+      <a class="btn" href="https://trana.app/">Open Trana</a>
+      <a class="btn" href="bridge.json">Raw bridge</a>
+    </div>
+  </div>
+
+  <h2>What this is</h2>
+  <p>Twinton (maps.ce-net.com) is a globe of digital twins. Trana (trana.app) is the public layer where results and reviews are posted. The relay is a deliberately small twin of the link between them: a cabinet at ce-net's home in Umeå, a beacon that turns amber when Trana's layer lags and red when either end is missing, and a panel that finds the announcement by title in the layer.</p>
+  <p>The bridge is not a copy of either side. It is one file with the link's state, the announcement id, and the age of the layer. The twin fetches it as one more data source; if the heartbeat stops, the twin says so instead of pretending the link is live.</p>
+
+  <h2>How it stays connected</h2>
+  <p>Every ten minutes (GitHub Actions' best effort) <code>heartbeat.py</code> fetches the twin manifest and Trana's public layer, finds the announcement, and commits <a href="bridge.json">bridge.json</a>. The workflow fails when the state is not <code>live</code>, so a broken link is visible in the repository's Actions tab. A failed check never erases the last thread id: the next successful run restores it.</p>
+  <p>No secret is stored here. The heartbeat only reads public URLs; it does not post to Trana. The announcement post and this bridge are the two static halves; the twin's read of the layer is the live half.</p>
+
+  <h2>Honest limits</h2>
+  <p>GitHub's scheduler can run late; the page shows the heartbeat's own age, not a promise. The public layer is a snapshot with a cache window, so a just-published announcement can be absent for a few minutes. The cabinet is schematic; the arcs are links to places, not cables. The packet motion illustrates the modelled posting rhythm and is not real traffic.</p>
+
+  <footer>
+    Sources: <span class="mono">trana.feed/2</span>, <span class="mono">trana.world/2</span>, the published twin manifest. Bridge schema <span class="mono">twinton.trana/1</span>. Repository: <a href="https://github.com/Leif-Rydenfalk/trana-twinton-link">Leif-Rydenfalk/trana-twinton-link</a>.
+  </footer>
+</div>
+<script>
+const $ = (id) => document.getElementById(id);
+const age = (s) => s == null ? "—" : s < 90 ? Math.round(s) + " s" : s < 5400 ? Math.round(s / 60) + " min" : (s / 3600).toFixed(1) + " h";
+function paint(b) {
+  const s = b?.link?.state || "broken";
+  $("dot").className = "dot " + s;
+  $("state").textContent = s + (b?.link?.checked_at ? " · checked " + age(Date.now() / 1000 - b.link.checked_at) + " ago" : "");
+  $("post").textContent = b?.link?.post_title || (b?.thread ? b.thread : "not found");
+  $("beat").textContent = b?.heartbeat?.updated ? age(Date.now() / 1000 - b.heartbeat.updated) + " old · run " + b.heartbeat.runs : "—";
+  $("layer").textContent = b?.link?.layer_age_s == null ? "—" : age(b.link.layer_age_s);
+}
+async function read() {
+  try { const r = await fetch("bridge.json?t=" + Date.now(), { cache: "no-store" }); paint(await r.json()); }
+  catch (e) { $("state").textContent = "bridge.json unreachable"; $("dot").className = "dot broken"; }
+}
+read(); setInterval(read, 60000);
+</script>
+</body>
+</html>
