@@ -19,6 +19,7 @@ import json
 import os
 import time
 import urllib.error
+import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
 
@@ -154,7 +155,7 @@ def main() -> int:
         "title": title,
         "twin_url": TWIN_OPEN,
         "thread": thread,
-        "thread_url": "https://trana.app/" if thread else None,
+        "thread_url": ("https://trana.app/?t=" + urllib.parse.quote(thread, safe="")) if thread else None,
         "link": {
             "state": state,
             "checked_at": now,
