@@ -79,7 +79,9 @@ function paint(b) {
   const s = b?.link?.state || "broken";
   $("dot").className = "dot " + s;
   $("state").textContent = s + (b?.link?.checked_at ? " · checked " + age(Date.now() / 1000 - b.link.checked_at) + " ago" : "");
-  $("post").textContent = b?.link?.post_title || (b?.thread ? b.thread : "not found");
+  const post = $("post");
+  post.textContent = b?.link?.post_title || (b?.thread ? b.thread : "not found");
+  if (b?.thread_url) { const a = document.createElement("a"); a.href = b.thread_url; a.textContent = " · open"; post.append(a); }
   $("beat").textContent = b?.heartbeat?.updated ? age(Date.now() / 1000 - b.heartbeat.updated) + " old · run " + b.heartbeat.runs : "—";
   $("layer").textContent = b?.link?.layer_age_s == null ? "—" : age(b.link.layer_age_s);
 }
