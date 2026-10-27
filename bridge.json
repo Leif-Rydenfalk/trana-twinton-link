@@ -7,11 +7,11 @@
   "thread_url": null,
   "link": {
     "state": "broken",
-    "checked_at": 1793061245,
+    "checked_at": 1793061341,
     "twin_ok": false,
     "post_ok": false,
     "layer_ok": true,
-    "layer_age_s": 8420,
+    "layer_age_s": 8516,
     "post_title": null,
     "errors": [
       "twin manifest: HTTP Error 404: Not Found",
@@ -19,8 +19,8 @@
     ]
   },
   "heartbeat": {
-    "updated": 1793061245,
-    "runs": 1,
+    "updated": 1793061341,
+    "runs": 2,
     "last_state": "broken",
     "changed_at": 1793061245,
     "since": 1793061245,
@@ -57,5 +57,5 @@
       "state": "missing"
     }
   ],
-  "updated": 1793061245
+  "updated": 1793061341
 }
