@@ -7,18 +7,18 @@
   "thread_url": "https://trana.app/?t=space%3Aglobal%2Ff926dca14835-1793061875984",
   "link": {
     "state": "live",
-    "checked_at": 1793062227,
+    "checked_at": 1793062309,
     "twin_ok": true,
     "post_ok": true,
     "layer_ok": true,
-    "layer_age_s": 9402,
+    "layer_age_s": 9484,
     "post_title": "Trana-Twinton relay: the link is the twin",
     "post_source": "api",
     "errors": []
   },
   "heartbeat": {
-    "updated": 1793062227,
-    "runs": 8,
+    "updated": 1793062309,
+    "runs": 9,
     "last_state": "live",
     "changed_at": 1793061740,
     "since": 1793061740,
@@ -57,9 +57,9 @@
   ],
   "mirror": {
     "url": "https://leif-rydenfalk.github.io/trana-twinton-link/feed.json",
-    "read_at": 1793062227,
+    "read_at": 1793062309,
     "ok": true,
     "posts": 40
   },
-  "updated": 1793062227
+  "updated": 1793062309
 }
