@@ -2,26 +2,25 @@
   "schema": "twinton.trana/1",
   "twin": "trana-relay",
   "title": "Trana-Twinton relay",
-  "twin_url": "https://maps.ce-net.com/?app=trana-relay",
+  "twin_url": "https://maps.ce-net.com/?app=https%3A%2F%2Fleif-rydenfalk.github.io%2Ftrana-twinton-link%2Ftwin%2Fapp.json",
   "thread": null,
   "thread_url": null,
   "link": {
     "state": "broken",
-    "checked_at": 1793061407,
-    "twin_ok": false,
+    "checked_at": 1793061480,
+    "twin_ok": true,
     "post_ok": false,
     "layer_ok": true,
-    "layer_age_s": 8582,
+    "layer_age_s": 8655,
     "post_title": null,
     "post_source": null,
     "errors": [
-      "twin manifest: HTTP Error 404: Not Found",
       "announcement is not in the public layer or the feed API"
     ]
   },
   "heartbeat": {
-    "updated": 1793061407,
-    "runs": 3,
+    "updated": 1793061480,
+    "runs": 4,
     "last_state": "broken",
     "changed_at": 1793061245,
     "since": 1793061245,
@@ -44,7 +43,7 @@
     },
     {
       "id": "twin-manifest",
-      "url": "https://tiles.ce-net.com/community/trana-relay/app.json",
+      "url": "https://leif-rydenfalk.github.io/trana-twinton-link/twin/app.json",
       "kind": "observed",
       "cadence_s": 60,
       "credit": "Published Twinton twin trana-relay"
@@ -58,5 +57,5 @@
       "state": "missing"
     }
   ],
-  "updated": 1793061407
+  "updated": 1793061480
 }
