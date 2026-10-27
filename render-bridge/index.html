@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Render buffers do not cross origins</title>
+<style>
+  :root { --bg:#070c12; --ink:#e8eef5; --dim:#93a4b5; --line:#1f3346; --acc:#4fe3ff; --card:#0d1620; }
+  * { box-sizing:border-box; } body { margin:0; background:var(--bg); color:var(--ink); font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif; }
+  main { max-width:880px; margin:0 auto; padding:48px 22px 80px; }
+  h1 { font-size:clamp(30px,5vw,48px); line-height:1.05; letter-spacing:-.03em; margin:0 0 12px; }
+  .kicker { color:var(--acc); font:600 11px/1 ui-monospace,Menlo,monospace; letter-spacing:.16em; text-transform:uppercase; }
+  p { color:var(--dim); } b, strong { color:var(--ink); }
+  img { width:100%; border:1px solid var(--line); border-radius:12px; margin:12px 0 6px; display:block; }
+  figcaption { color:var(--dim); font-size:13px; margin:0 0 26px; }
+  h2 { font-size:22px; margin:38px 0 8px; }
+  code { font:13px/1.5 ui-monospace,Menlo,monospace; background:#111c27; padding:1px 5px; border-radius:5px; }
+  a { color:var(--acc); }
+  .box { border:1px solid var(--line); background:var(--card); border-radius:14px; padding:18px 20px; margin:20px 0; }
+</style>
+</head>
+<body><main>
+<div class="kicker">Twinton / render surface</div>
+<h1>Render buffers do not cross origins.</h1>
+<p>I tried to put a full foreign render scene onto the globe. The result is a <b>frame handoff</b>, not a shared GPU texture: a sandboxed iframe renders, transfers a frame, and the globe uploads it to a plane in its own scene.</p>
+<figure><img src="surface.png" alt="A cross-origin factory scene composited on a globe"><figcaption>640×400 factory scene rendered in a sandboxed iframe, uploaded as a texture on a depth-tested plane at Umeå. ~25 fps, ~1 MB/frame, 1–8 ms parent-side.</figcaption></figure>
+<h2>What works</h2>
+<div class="box"><p>A WebGL child and a WebGPU child both hand frames over. The WebGPU path needs a texture → buffer → RGBA readback; <code>createImageBitmap(canvas)</code> returned an empty bitmap for a WebGPU canvas in Chrome. The globe never touches the child's GPU resources.</p></div>
+<figure><img src="webgpu-surface.png" alt="WebGPU child frame read back and composited"><figcaption>The WebGPU variant: the child copies its canvas texture to a buffer and sends the RGBA frame.</figcaption></figure>
+<h2>What does not work</h2>
+<p>Cross-origin <code>WebGLTexture</code>/<code>GPUTexture</code>/<code>GPUDevice</code> sharing is not exposed. <code>SharedArrayBuffer</code> needs COOP/COEP and shares CPU bytes, not GPU memory. <code>document.domain</code> is removed. A CORS bypass is a bug, not a design. The “unsafe framebuffer insertion” is not a capability you can turn on.</p>
+<h2>Why it is still not shipped</h2>
+<p>The renderer is not the bottleneck; the <b>maps host</b> is. The current sandbox gives an app no surface, no WebGPU, no RTX; it can only postMessage. The host needs a <code>ctx.surface</code> capability that owns the texture, anchor, depth test and rate cap. That patch is written, but the real <code>maps.ce-net.com</code> host source is not in this workspace, so the demo stays on localhost.</p>
+<h2>On three-rs</h2>
+<p><a href="https://github.com/oneilltomhq/three-rs">three-rs</a> is real: 0.3.0, 100/215 gradeable three.js pages, WebGPU wasm, glTF, headless readback. It is not drop-in: unstable API, native Vulkan-only (macOS needs a Metal patch), no generic runtime-GLB viewer, and glTF cameras/lights are not imported. It belongs in the child or a first-party module, behind a pinned version.</p>
+<p><a href="https://trana.app/">Trana</a> · <a href="https://maps.ce-net.com/">Twinton</a></p>
+</main></body></html>
