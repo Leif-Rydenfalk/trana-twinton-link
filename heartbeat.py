@@ -25,8 +25,8 @@ from datetime import datetime, timezone
 ROOT = os.path.dirname(os.path.abspath(__file__))
 BRIDGE = os.path.join(ROOT, "bridge.json")
 TWIN_ID = "trana-relay"
-TWIN_MANIFEST = "https://tiles.ce-net.com/community/trana-relay/app.json"
-TWIN_OPEN = "https://maps.ce-net.com/?app=trana-relay"
+TWIN_MANIFEST = "https://leif-rydenfalk.github.io/trana-twinton-link/twin/app.json"
+TWIN_OPEN = "https://maps.ce-net.com/?app=https%3A%2F%2Fleif-rydenfalk.github.io%2Ftrana-twinton-link%2Ftwin%2Fapp.json"
 TRANA_LAYER = "https://maps.ce-net.com/tiles/layers/trana-feed.json"
 TRANA_API = "https://ce-net.com/mcp"
 TRANA_WORLD = "https://www.trana.app/data/world.json"
