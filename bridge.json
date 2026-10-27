@@ -1,29 +1,27 @@
 {
   "schema": "twinton.trana/1",
   "twin": "trana-relay",
-  "title": "Trana-Twinton relay",
+  "title": "Trana-Twinton relay: the link is the twin",
   "twin_url": "https://maps.ce-net.com/?app=https%3A%2F%2Fleif-rydenfalk.github.io%2Ftrana-twinton-link%2Ftwin%2Fapp.json",
-  "thread": null,
-  "thread_url": null,
+  "thread": "space:global/f926dca14835-1793061497205",
+  "thread_url": "https://trana.app/",
   "link": {
-    "state": "broken",
-    "checked_at": 1793061480,
+    "state": "live",
+    "checked_at": 1793061740,
     "twin_ok": true,
-    "post_ok": false,
+    "post_ok": true,
     "layer_ok": true,
-    "layer_age_s": 8655,
-    "post_title": null,
-    "post_source": null,
-    "errors": [
-      "announcement is not in the public layer or the feed API"
-    ]
+    "layer_age_s": 8915,
+    "post_title": "Trana-Twinton relay: the link is the twin",
+    "post_source": "api",
+    "errors": []
   },
   "heartbeat": {
-    "updated": 1793061480,
-    "runs": 4,
-    "last_state": "broken",
-    "changed_at": 1793061245,
-    "since": 1793061245,
+    "updated": 1793061740,
+    "runs": 5,
+    "last_state": "live",
+    "changed_at": 1793061740,
+    "since": 1793061740,
     "schedule": "every 10 min (GitHub Actions best effort)"
   },
   "sources": [
@@ -54,8 +52,14 @@
       "id": "trana-post",
       "kind": "social",
       "url": "https://trana.app/",
-      "state": "missing"
+      "state": "found"
     }
   ],
-  "updated": 1793061480
+  "mirror": {
+    "url": "https://leif-rydenfalk.github.io/trana-twinton-link/feed.json",
+    "read_at": 1793061740,
+    "ok": true,
+    "posts": 40
+  },
+  "updated": 1793061740
 }
