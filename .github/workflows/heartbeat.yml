@@ -37,7 +37,7 @@ jobs:
         run: |
           git config user.name "trana-relay-heartbeat"
           git config user.email "actions@users.noreply.github.com"
-          git add bridge.json
+          git add bridge.json feed.json
           if git diff --cached --quiet; then
             echo "bridge unchanged"
           else
