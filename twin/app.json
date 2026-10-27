@@ -1,0 +1,25 @@
+{
+  "id": "trana-relay",
+  "title": "Trana-Twinton relay",
+  "what": "A small relay at ce-net's home in Umea. Every 60 s it reads Trana's public layer: announcement, layer age and posting rhythm, with arcs to Trana's named places. Cabinet and packet motion are illustrative; figures are live.",
+  "kind": "twin",
+  "needs": [
+    "local",
+    "box",
+    "points",
+    "arc",
+    "ring",
+    "panel",
+    "orbit",
+    "fly",
+    "base",
+    "steps"
+  ],
+  "data": [
+    "https://maps.ce-net.com/tiles/layers/trana-feed.json",
+    "https://www.trana.app/data/world.json",
+    "https://leif-rydenfalk.github.io/trana-twinton-link/bridge.json"
+  ],
+  "models": [],
+  "entry": "entry.js"
+}
