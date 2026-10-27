@@ -7,20 +7,21 @@
   "thread_url": null,
   "link": {
     "state": "broken",
-    "checked_at": 1793061341,
+    "checked_at": 1793061407,
     "twin_ok": false,
     "post_ok": false,
     "layer_ok": true,
-    "layer_age_s": 8516,
+    "layer_age_s": 8582,
     "post_title": null,
+    "post_source": null,
     "errors": [
       "twin manifest: HTTP Error 404: Not Found",
-      "announcement is not in the public layer"
+      "announcement is not in the public layer or the feed API"
     ]
   },
   "heartbeat": {
-    "updated": 1793061341,
-    "runs": 2,
+    "updated": 1793061407,
+    "runs": 3,
     "last_state": "broken",
     "changed_at": 1793061245,
     "since": 1793061245,
@@ -57,5 +58,5 @@
       "state": "missing"
     }
   ],
-  "updated": 1793061341
+  "updated": 1793061407
 }
