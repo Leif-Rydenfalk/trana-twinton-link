@@ -17,6 +17,7 @@ const LAT = 63.826, LON = 20.263;                 // Umea, where the ce-net subj
 const FEED = "https://maps.ce-net.com/tiles/layers/trana-feed.json";
 const WORLD = "https://www.trana.app/data/world.json";
 const BRIDGE = "https://leif-rydenfalk.github.io/trana-twinton-link/bridge.json";
+const MIRROR = "https://leif-rydenfalk.github.io/trana-twinton-link/feed.json";
 const TWIN_URL = "https://maps.ce-net.com/?app=https%3A%2F%2Fleif-rydenfalk.github.io%2Ftrana-twinton-link%2Ftwin%2Fapp.json";
 const POST_PREFIX = "Trana-Twinton relay";         // the announcement's title starts with this
 const CYAN = "#4fe3ff", AMBER = "#ffb547", GREEN = "#43e08a", RED = "#ff6b6b";
@@ -49,7 +50,7 @@ export async function start(ctx) {
   const inc = (v) => (v <= 0 ? 0.2 : 0.6 + Math.min(2.6, v * 0.55));
 
   // ---------------------------------------------------------------- data state
-  const S = { feed: null, world: null, bridge: null, drawn: false, lastRead: 0, lastOk: 0, busy: false, error: "", layerState: "connecting", rhythm: null, lastPanel: 0 };
+  const S = { feed: null, layer: null, world: null, bridge: null, feedSource: "—", feedAt: null, drawn: false, lastRead: 0, lastOk: 0, busy: false, error: "", layerState: "connecting", rhythm: null, lastPanel: 0 };
   const now = () => Date.now();
   const fmtAge = (s) => {
     if (s == null || !isFinite(s)) return "—";
@@ -114,21 +115,22 @@ export async function start(ctx) {
     posts.sort((a, b) => (+b.at_ms || 0) - (+a.at_ms || 0));
     const latest = posts[0] || null;
     const post = posts.find((p) => String(p.title || "").startsWith(POST_PREFIX)) || null;
-    const age = feed?.at_s ? now() - feed.at_s * 1000 : null;
     const post24 = posts.filter((p) => now() - (+p.at_ms || 0) < 86_400_000).length;
     const rh = S.rhythm || { ema: null, mae: null, n: 0 };
     const placed = (S.world?.subjects || []).filter((s) => Number.isFinite(s.lat));
     const b = S.bridge;
     const bridgeState = b?.link?.state || "no bridge";
     const beatAge = b?.heartbeat?.updated ? now() / 1000 - b.heartbeat.updated : null;
+    const feedAge = S.feedAt ? now() / 1000 - S.feedAt : null;
+    const feedState = feedAge == null ? "unknown" : feedAge <= 900 ? "fresh" : feedAge <= 3600 ? "lagging" : "stale";
+    const layerAge = S.layer?.at_s ? now() / 1000 - S.layer.at_s : null;
     const link = post ? "found · " + String(post.thread || "").split("/").pop()
       : b?.thread ? "bridge only · " + String(b.thread).split("/").pop()
-      : "not in the layer yet";
-    const state = S.error ? "offline — last read kept" : S.layerState;
+      : "not in the feed";
     const colour = S.error || bridgeState === "broken" ? RED
-      : bridgeState === "stale" || (beatAge != null && beatAge > 1800) ? AMBER
+      : bridgeState === "stale" || (beatAge != null && beatAge > 1800) || feedState === "stale" ? AMBER
       : bridgeState === "no bridge" ? AMBER
-      : state === "fresh" ? GREEN : state === "lagging" ? AMBER : RED;
+      : feedState === "fresh" ? GREEN : AMBER;
     ctx.set(beacon, { color: colour });
     ctx.set(amber, { color: post || b?.thread ? AMBER : "#6b4a16" });
     ctx.set(cyan, { color: S.error ? "#4a5a66" : CYAN });
@@ -138,8 +140,9 @@ export async function start(ctx) {
       rows: [
         ["Link", link],
         ["Heartbeat", b ? bridgeState + " · " + fmtAge(beatAge) + " old" : "no bridge yet"],
-        ["Layer", state],
-        ["Layer age", age == null ? "—" : fmtAge(age / 1000)],
+        ["Feed", S.feedSource + " · " + feedState],
+        ["Feed age", fmtAge(feedAge)],
+        ["Public layer", S.layerState + (layerAge == null ? "" : " · " + fmtAge(layerAge))],
         ["Latest", latest ? cut(latest.title, 46) : "—"],
         ["Posts 24 h", String(post24)],
         ["Rhythm (EMA)", rh.ema == null ? "—" : fmtAge(rh.ema) + " between posts"],
@@ -151,7 +154,7 @@ export async function start(ctx) {
         { label: "Close-up", onClick: () => ctx.orbit(LAT, LON, 70, { heading: 25, tilt: 26 }) },
         { label: "Whole link", onClick: () => ctx.fly(LAT, LON, 1.7, 1800) },
       ],
-      source: "Sources: trana.feed/2 and trana.world/2, read with CORS every 60 s; the bridge is a public heartbeat (GitHub Action). Cabinet is schematic; bars are 2 h post counts, arcs are links to named places, not cables. Packet motion illustrates the modelled posting rhythm; it is not real traffic. Announcement: " + POST_PREFIX + " · " + TWIN_URL,
+      source: "Sources: trana.feed/2 and trana.world/2, read with CORS every 60 s; feed.json is a mirror written by the heartbeat when the public layer lags; the bridge is a public heartbeat (GitHub Action). Cabinet is schematic; bars are 2 h post counts, arcs are links to named places, not cables. Packet motion illustrates the modelled posting rhythm; it is not real traffic. Announcement: " + POST_PREFIX + " · " + TWIN_URL,
     });
   }
 
@@ -159,22 +162,32 @@ export async function start(ctx) {
     if (S.busy) return;
     S.busy = true; S.lastRead = now();
     try {
-      const [feed, world, bridge] = await Promise.all([
+      const [layer, world, bridge, mirror] = await Promise.all([
         ctx.data(FEED).catch(() => null),
         ctx.data(WORLD).catch(() => null),
         ctx.data(BRIDGE).catch(() => null),
+        ctx.data(MIRROR).catch(() => null),
       ]);
-      if (feed && Array.isArray(feed.posts)) {
-        S.feed = feed; S.error = ""; S.lastOk = now();
-        const age = feed.at_s ? (now() - feed.at_s * 1000) / 1000 : null;
+      if (layer && Array.isArray(layer.posts)) {
+        S.layer = layer;
+        const age = layer.at_s ? (now() - layer.at_s * 1000) / 1000 : null;
         S.layerState = age == null ? "unknown" : age <= 900 ? "fresh" : age <= 3600 ? "lagging" : "stale";
+      }
+      let feed = null, source = "—", at = null;
+      if (mirror && Array.isArray(mirror.posts) && mirror.posts.length) {
+        feed = mirror; source = "mirror"; at = mirror.read_at || mirror.at_s || null;
+      } else if (layer && Array.isArray(layer.posts)) {
+        feed = layer; source = "public layer"; at = layer.at_s || null;
+      }
+      if (feed) {
+        S.feed = feed; S.feedSource = source; S.feedAt = at; S.error = ""; S.lastOk = now();
         setBars(buckets(feed.posts));
         S.rhythm = rhythm(feed.posts.filter((p) => p.title));
       } else if (!S.feed) {
-        S.error = "Trana layer unreachable";
+        S.error = "Trana feed unreachable";
         S.layerState = "offline";
       } else {
-        S.error = "Trana layer unreachable; last read kept";
+        S.error = "Trana feed unreachable; last read kept";
       }
       if (world && Array.isArray(world.subjects)) { S.world = world; drawWorld(world); }
       if (bridge && bridge.schema === "twinton.trana/1") S.bridge = bridge;
