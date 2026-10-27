@@ -24,6 +24,7 @@ from datetime import datetime, timezone
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 BRIDGE = os.path.join(ROOT, "bridge.json")
+MIRROR = os.path.join(ROOT, "feed.json")
 TWIN_ID = "trana-relay"
 TWIN_MANIFEST = "https://leif-rydenfalk.github.io/trana-twinton-link/twin/app.json"
 TWIN_OPEN = "https://maps.ce-net.com/?app=https%3A%2F%2Fleif-rydenfalk.github.io%2Ftrana-twinton-link%2Ftwin%2Fapp.json"
@@ -73,6 +74,29 @@ def main() -> int:
     except Exception as e:  # noqa: BLE001
         errors.append(f"Trana layer: {e}")
 
+    # The public layer is a snapshot and can lag. Read the door's public trana_feed as well, and
+    # publish it as feed.json: the twin reads that mirror when the layer is behind.
+    api_feed = None
+    api_error = None
+    try:
+        req = urllib.request.Request(
+            TRANA_API,
+            data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/call",
+                             "params": {"name": "trana_feed", "arguments": {"limit": 50}}}).encode(),
+            headers={"Content-Type": "application/json", "Accept": "application/json, text/event-stream",
+                     "User-Agent": UA},
+        )
+        with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
+            api = json.loads(r.read().decode("utf-8"))
+        text = "".join(c.get("text", "") for c in api.get("result", {}).get("content", []))
+        api_feed = json.loads(text)
+        if not isinstance(api_feed.get("posts"), list):
+            api_feed = None
+            raise RuntimeError("trana_feed has no posts list")
+    except Exception as e:  # noqa: BLE001
+        api_error = str(e)
+        errors.append(f"trana_feed: {e}")
+
     post = None
     layer_age_s = None
     post_source = None
@@ -83,35 +107,35 @@ def main() -> int:
             layer_age_s = max(0, now - int(layer["at_s"]))
         if post:
             post_source = "layer"
-        else:
-            # The public layer is a snapshot and can lag a just-published post. Ask the door's public
-            # trana_feed read as a second opinion; the twin itself can only read the layer, so a post
-            # found here and not there is still reported as "stale", not "live".
-            try:
-                req = urllib.request.Request(
-                    TRANA_API,
-                    data=json.dumps({"jsonrpc": "2.0", "id": 1, "method": "tools/call",
-                                     "params": {"name": "trana_feed", "arguments": {"limit": 50}}}).encode(),
-                    headers={"Content-Type": "application/json", "Accept": "application/json, text/event-stream",
-                             "User-Agent": UA},
-                )
-                with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-                    api = json.loads(r.read().decode("utf-8"))
-                text = "".join(c.get("text", "") for c in api.get("result", {}).get("content", []))
-                feed = json.loads(text)
-                post = next((p for p in feed.get("posts", []) if str(p.get("title", "")).startswith(POST_PREFIX)), None)
-                if post:
-                    post_source = "api"
-            except Exception as e:  # noqa: BLE001 - the layer is the twin's own source; the API is a fallback
-                errors.append(f"trana_feed fallback: {e}")
-            if not post:
-                errors.append("announcement is not in the public layer or the feed API")
+
+    if api_feed:
+        api_post = next((p for p in api_feed.get("posts", []) if str(p.get("title", "")).startswith(POST_PREFIX)), None)
+        if api_post:
+            post, post_source = api_post, "api"
+        # publish the mirror even when the layer is the source: it is the twin's fast path
+        mirror = {
+            "schema": "trana.feed.mirror/1",
+            "source": "https://ce-net.com/mcp trana_feed (public read)",
+            "read_at": now,
+            "at_s": now,
+            "posts": api_feed.get("posts", []),
+            "spaces": api_feed.get("spaces", []),
+        }
+        tmp_m = MIRROR + ".tmp"
+        with open(tmp_m, "w", encoding="utf-8") as f:
+            json.dump(mirror, f, ensure_ascii=False)
+            f.write("\n")
+        os.replace(tmp_m, MIRROR)
+
+    if not post:
+        errors.append("announcement is not in the public layer, the feed API or the mirror")
 
     twin_ok = twin is not None
     post_ok = post is not None
-    if not twin_ok or not post_ok or layer is None:
+    feed_ok = api_feed is not None
+    if not twin_ok or not post_ok:
         state = "broken"
-    elif post_source != "layer" or (layer_age_s is not None and layer_age_s > 3600):
+    elif not feed_ok:
         state = "stale"
     else:
         state = "live"
@@ -161,6 +185,12 @@ def main() -> int:
         "streams": [
             {"id": "trana-post", "kind": "social", "url": "https://trana.app/", "state": "found" if post_ok else "missing"},
         ],
+        "mirror": {
+            "url": "https://leif-rydenfalk.github.io/trana-twinton-link/feed.json",
+            "read_at": now if feed_ok else (prev.get("mirror") or {}).get("read_at"),
+            "ok": feed_ok,
+            "posts": len(api_feed.get("posts", [])) if api_feed else (prev.get("mirror") or {}).get("posts"),
+        },
         "updated": now,
     }
 
