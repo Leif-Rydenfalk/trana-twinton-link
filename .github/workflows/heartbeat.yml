@@ -41,9 +41,11 @@ jobs:
           if git diff --cached --quiet; then
             echo "bridge unchanged"
           else
-            git commit -m "heartbeat: $(python3 -c 'import json;print(json.load(open(\"bridge.json\"))[\"link\"][\"state\"])') $(date -u +%FT%TZ)"
-            git push
+            git commit -m "heartbeat $(date -u +%FT%TZ)"
           fi
+          # another lane (the Pages build, an API upload, or a person) may have pushed: replay on top
+          git pull --rebase origin main
+          git push
 
       - name: Fail when the link is not live
         run: |
