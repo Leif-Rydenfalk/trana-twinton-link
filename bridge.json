@@ -6,22 +6,25 @@
   "thread": "space:global/f926dca14835-1793061875984",
   "thread_url": "https://trana.app/?t=space%3Aglobal%2Ff926dca14835-1793061875984",
   "link": {
-    "state": "live",
-    "checked_at": 1793208104,
+    "state": "broken",
+    "checked_at": 1793224092,
     "twin_ok": true,
-    "post_ok": true,
+    "post_ok": false,
     "layer_ok": true,
-    "layer_age_s": 13240,
-    "post_title": "Trana-Twinton relay: the link is the twin",
-    "post_source": "api",
-    "errors": []
+    "layer_age_s": 12500,
+    "post_title": null,
+    "post_source": null,
+    "errors": [
+      "trana_feed: Expecting value: line 1 column 1 (char 0)",
+      "announcement is not in the public layer, the feed API or the mirror"
+    ]
   },
   "heartbeat": {
-    "updated": 1793208104,
-    "runs": 17,
-    "last_state": "live",
-    "changed_at": 1793061740,
-    "since": 1793061740,
+    "updated": 1793224092,
+    "runs": 18,
+    "last_state": "broken",
+    "changed_at": 1793224092,
+    "since": 1793224092,
     "schedule": "every 10 min (GitHub Actions best effort)"
   },
   "sources": [
@@ -52,14 +55,14 @@
       "id": "trana-post",
       "kind": "social",
       "url": "https://trana.app/",
-      "state": "found"
+      "state": "missing"
     }
   ],
   "mirror": {
     "url": "https://leif-rydenfalk.github.io/trana-twinton-link/feed.json",
     "read_at": 1793208104,
-    "ok": true,
+    "ok": false,
     "posts": 46
   },
-  "updated": 1793208104
+  "updated": 1793224092
 }
