@@ -7,11 +7,11 @@
   "thread_url": "https://trana.app/?t=space%3Aglobal%2Ff926dca14835-1793061875984",
   "link": {
     "state": "broken",
-    "checked_at": 1793236700,
+    "checked_at": 1793258069,
     "twin_ok": true,
     "post_ok": false,
     "layer_ok": true,
-    "layer_age_s": 25108,
+    "layer_age_s": 46477,
     "post_title": null,
     "post_source": null,
     "errors": [
@@ -20,8 +20,8 @@
     ]
   },
   "heartbeat": {
-    "updated": 1793236700,
-    "runs": 19,
+    "updated": 1793258069,
+    "runs": 20,
     "last_state": "broken",
     "changed_at": 1793224092,
     "since": 1793224092,
@@ -64,5 +64,5 @@
     "ok": false,
     "posts": 46
   },
-  "updated": 1793236700
+  "updated": 1793258069
 }
